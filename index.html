@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>125 Broadstreet's Dosing Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        label .optional {
+            font-weight: 400;
+            color: #888;
+            font-size: 12px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .result-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .result-unit {
+            font-size: 14px;
+            color: #888;
+            font-weight: 400;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-left-color: #764ba2;
+        }
+
+        .highlight .result-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .highlight .result-value {
+            color: white;
+        }
+
+        .highlight .result-unit {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌿 125 Broadstreet's Dosing Calculator</h1>
+            <p>Calculate precise THC dosages for your cannabis infusions</p>
+        </div>
+
+        <div class="content">
+            <form id="dosingForm">
+                <!-- Cannabis Input Section -->
+                <div class="section">
+                    <div class="section-title">Cannabis Information</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="baseType">Base Type</label>
+                            <select id="baseType" required>
+                                <option value="">Select base type</option>
+                                <option value="butter">Butter</option>
+                                <option value="oil">Oil</option>
+                                <option value="coconut-oil">Coconut Oil</option>
+                                <option value="tincture">Tincture</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cannabisGrams">Cannabis Used (grams)</label>
+                            <input type="number" id="cannabisGrams" step="0.01" required placeholder="e.g., 7.5">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="thcPercent">THC % <span class="optional">(optional)</span></label>
+                            <input type="number" id="thcPercent" step="0.01" placeholder="e.g., 20">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="thcaPercent">THCA % <span class="optional">(optional)</span></label>
+                            <input type="number" id="thcaPercent" step="0.01" placeholder="e.g., 0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="efficiency">Efficiency % <span class="optional">(default 75%)</span></label>
+                            <input type="number" id="efficiency" step="0.01" value="75" placeholder="75">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Base Information Section -->
+                <div class="section">
+                    <div class="section-title">Base Information</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="totalBaseMade">Total Base Made</label>
+                            <input type="number" id="totalBaseMade" step="0.01" required placeholder="e.g., 2">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="totalBaseUnit">Total Base Unit</label>
+                            <select id="totalBaseUnit" required>
+                                <option value="cups">Cups</option>
+                                <option value="ml">mL</option>
+                                <option value="fl-oz">fl oz</option>
+                                <option value="tbsp">Tablespoons</option>
+                                <option value="tsp">Teaspoons</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recipe Information Section -->
+                <div class="section">
+                    <div class="section-title">Recipe Information</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="baseUsed">Base Used in Recipe</label>
+                            <input type="number" id="baseUsed" step="0.01" required placeholder="e.g., 0.5">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="recipeUnit">Recipe Unit</label>
+                            <select id="recipeUnit" required>
+                                <option value="cups">Cups</option>
+                                <option value="ml">mL</option>
+                                <option value="fl-oz">fl oz</option>
+                                <option value="tbsp">Tablespoons</option>
+                                <option value="tsp">Teaspoons</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="servings">Final Servings/Pieces</label>
+                            <input type="number" id="servings" step="1" required placeholder="e.g., 12">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="calculate-btn">Calculate Dosage</button>
+            </form>
+
+            <!-- Results Section -->
+            <div id="results" class="results">
+                <div class="section-title">Results</div>
+                <div class="result-grid">
+                    <div class="result-item highlight">
+                        <div class="result-label">Total THC</div>
+                        <div class="result-value"><span id="totalThc">0</span> <span class="result-unit">mg</span></div>
+                    </div>
+                    <div class="result-item highlight">
+                        <div class="result-label">Per Serving</div>
+                        <div class="result-value"><span id="perServing">0</span> <span class="result-unit">mg</span></div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Per Recipe Batch</div>
+                        <div class="result-value"><span id="perRecipe">0</span> <span class="result-unit">mg</span></div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Per mL</div>
+                        <div class="result-value"><span id="perMl">0</span> <span class="result-unit">mg</span></div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Per Teaspoon</div>
+                        <div class="result-value"><span id="perTsp">0</span> <span class="result-unit">mg</span></div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Per Tablespoon</div>
+                        <div class="result-value"><span id="perTbsp">0</span> <span class="result-unit">mg</span></div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Per fl oz</div>
+                        <div class="result-value"><span id="perFlOz">0</span> <span class="result-unit">mg</span></div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Per Cup</div>
+                        <div class="result-value"><span id="perCup">0</span> <span class="result-unit">mg</span></div>
+                    </div>
+                </div>
+                <div class="disclaimer">
+                    ⚠️ <strong>Disclaimer:</strong> This calculator provides estimates only. Actual potency may vary. Always start with a low dose and wait at least 2 hours before consuming more. Consult local laws and regulations regarding cannabis use.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Conversion constants (all to mL)
+        const conversions = {
+            'cups': 236.588,
+            'ml': 1,
+            'fl-oz': 29.5735,
+            'tbsp': 14.7868,
+            'tsp': 4.92892
+        };
+
+        // Standard conversions from mL
+        const mlToTsp = 0.202884;  // 1 mL = 0.202884 tsp
+        const mlToTbsp = 0.067628; // 1 mL = 0.067628 tbsp
+        const mlToFlOz = 0.033814; // 1 mL = 0.033814 fl oz
+        const mlToCup = 0.00422675; // 1 mL = 0.00422675 cups
+
+        document.getElementById('dosingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateDosage();
+        });
+
+        function calculateDosage() {
+            // Get input values
+            const cannabisGrams = parseFloat(document.getElementById('cannabisGrams').value) || 0;
+            const thcPercent = parseFloat(document.getElementById('thcPercent').value) || 0;
+            const thcaPercent = parseFloat(document.getElementById('thcaPercent').value) || 0;
+            const efficiency = parseFloat(document.getElementById('efficiency').value) || 75;
+            const totalBaseMade = parseFloat(document.getElementById('totalBaseMade').value) || 0;
+            const totalBaseUnit = document.getElementById('totalBaseUnit').value;
+            const baseUsed = parseFloat(document.getElementById('baseUsed').value) || 0;
+            const recipeUnit = document.getElementById('recipeUnit').value;
+            const servings = parseFloat(document.getElementById('servings').value) || 1;
+
+            // Convert THCA to THC (THCA * 0.877 = THC when decarboxylated)
+            const thcFromThca = thcaPercent * 0.877;
+            const totalThcPercent = thcPercent + thcFromThca;
+
+            // Calculate total THC in mg
+            const totalThcMg = cannabisGrams * 1000 * (totalThcPercent / 100) * (efficiency / 100);
+
+            // Convert base amounts to mL
+            const totalBaseMl = totalBaseMade * conversions[totalBaseUnit];
+            const baseUsedMl = baseUsed * conversions[recipeUnit];
+
+            // Calculate mg per mL of the base
+            const mgPerMl = totalThcMg / totalBaseMl;
+
+            // Calculate total THC in the recipe
+            const totalThcInRecipe = mgPerMl * baseUsedMl;
+
+            // Calculate per serving
+            const mgPerServing = totalThcInRecipe / servings;
+
+            // Calculate various measurements
+            const mgPerTsp = mgPerMl * (1 / mlToTsp);
+            const mgPerTbsp = mgPerMl * (1 / mlToTbsp);
+            const mgPerFlOz = mgPerMl * (1 / mlToFlOz);
+            const mgPerCup = mgPerMl * (1 / mlToCup);
+
+            // Display results
+            document.getElementById('totalThc').textContent = totalThcMg.toFixed(2);
+            document.getElementById('perServing').textContent = mgPerServing.toFixed(2);
+            document.getElementById('perRecipe').textContent = totalThcInRecipe.toFixed(2);
+            document.getElementById('perMl').textContent = mgPerMl.toFixed(2);
+            document.getElementById('perTsp').textContent = mgPerTsp.toFixed(2);
+            document.getElementById('perTbsp').textContent = mgPerTbsp.toFixed(2);
+            document.getElementById('perFlOz').textContent = mgPerFlOz.toFixed(2);
+            document.getElementById('perCup').textContent = mgPerCup.toFixed(2);
+
+            // Show results
+            document.getElementById('results').classList.add('show');
+            
+            // Smooth scroll to results
+            setTimeout(() => {
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+    </script>
+</body>
+</html>
